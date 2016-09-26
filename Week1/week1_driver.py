@@ -10,7 +10,7 @@ def plotPoints(x, f_slope, f_intercept, y, g):
     plt.xlim((minAxis, maxAxis))
     plt.ylim((minAxis, maxAxis))
 
-    # Plot the data points, use y to set the color
+    # Plot the data points, use y (labels) to set the color
     plt.scatter(x[:, 0], x[:, 1], c=y)
 
     # Plot target function f
@@ -34,76 +34,76 @@ def plotPoints(x, f_slope, f_intercept, y, g):
     plt.show()
 
 
-# ---------------- Constants ----------------
-minAxis = -1  # grid size
-maxAxis = 1
-d = 2                       # number of dimensions
-N = 10                      # number of training points
-num_iter = 250              # maximum number of iterations per run
-num_runs = 1000             # number of runs
-numProb = 1000              # number of out of sample points used to predict P(f <> g)
-
-#  q7-8: N =  10, num_runs = 1000
-# q9-10: N = 100, num_runs = 1000
-
 # ---------------- Start ----------------
-numIterations = []
-probabilities = []
 
-# Execute Perceptron algorithm
-for run in np.arange(num_runs):
-    # Initialise run specific variables
-    numIter = 1
+if __name__ == "__main__":
+    # ---------------- Constants ----------------
+    minAxis = -1                # grid size
+    maxAxis = 1
+    d = 2                       # number of dimensions
+    N = 10                      # number of training points
+    num_iter = 250              # maximum number of iterations per run
+    num_runs = 1000             # number of runs
+    numProb = 1000              # number of out of sample points used to predict P(f <> g)
 
-    xOrg = np.random.uniform(minAxis, maxAxis, size=(N, d))         # create input vector x
-    fPts = np.random.uniform(minAxis, maxAxis, size=(2,2))          # find two random points
-    f_slope, f_intercept = np.polyfit(fPts[:, 0], fPts[:, 1], 1)    # and use them to create target function f
-    y = np.sign(xOrg[:,0] * f_slope - xOrg[:, 1] + f_intercept)     # determine y (= f evaluated on x)
-    x = np.hstack((np.ones((N, 1)), xOrg))                          # add x0 to x
-    w = np.zeros((1, d + 1))  # reset weights vector to zero
+    #  For q7-8: N =  10, num_runs = 1000
+    # For q9-10: N = 100, num_runs = 1000
 
-    # Run the Perceptron Learning Algorithm
-    for iter in np.arange(num_iter):
-        hypothesis = np.sign(np.dot(x, w.T).T)              # calculate the hypothesis
-        missed = (y!=hypothesis)                            # determine misclassified points
+    numIterations = []
+    probabilities = []
 
-        if np.sum(missed) != 0:
-            # Pick a random missclassified point
-            idx = [i for i, ele in enumerate(missed[0]) if ele==True]   # indices of misclassified points
-            tmpIndex = np.random.randint(0, len(idx))                   # pick one of the indices
-            rndIndex = idx[tmpIndex]                                    # determine the index in x
+    # Execute the Perceptron algorithm
+    for run in np.arange(num_runs):
+        # Initialise run specific variables
+        numIter = 1
+        w = np.zeros((1, d + 1))                                        # reset weights vector to zero
 
-            w = w + y[rndIndex] * x[rndIndex]                           # update the weights
-            numIter += 1
-        else:
-            # no misclassifications: done
-            break
+        # Create random observations
+        xOrg = np.random.uniform(minAxis, maxAxis, size=(N, d))         # create input vector x
+        fPts = np.random.uniform(minAxis, maxAxis, size=(2,2))          # find two random points
+        f_slope, f_intercept = np.polyfit(fPts[:, 0], fPts[:, 1], 1)    # and use them to create target function f
+        y = np.sign(xOrg[:,0] * f_slope - xOrg[:, 1] + f_intercept)     # determine y (= f evaluated on x)
+        x = np.hstack((np.ones((N, 1)), xOrg))                          # add x0 to x
 
-    # Calculate P(f <> g) for a large number of out of sample points
-    tmpXOrg = np.random.uniform(minAxis, maxAxis, size=(numProb, d))          # create input vector
-    yActual = np.sign(tmpXOrg[:,0] * f_slope - tmpXOrg[:, 1] + f_intercept)   # determine y (= f evaluated on x)
-    tmpX = np.hstack((np.ones((numProb, 1)), tmpXOrg))                  # add x0 to x
-    yPred = np.sign(np.dot(tmpX, w.T).T)                                # evaluate the hypothesis g on x
-    missed = np.sum((yPred != yActual))                                 # number of misclassified points
+        # Run the Perceptron Learning Algorithm
+        for iter in np.arange(num_iter):
+            hypothesis = np.sign(np.dot(x, w.T).T)                      # calculate the hypothesis: x * w.T
+            missed = (y!=hypothesis)                                    # determine misclassified points
 
-    # Keep track of the P(f <> g)
-    probabilities.append(missed / numProb)
+            if np.sum(missed) != 0:
+                # Pick a random missclassified point
+                idx = [i for i, ele in enumerate(missed[0]) if ele==True]   # indices of misclassified points
+                tmpIndex = np.random.randint(0, len(idx))                   # pick one of the indices
+                rndIndex = idx[tmpIndex]                                    # determine the index in x
 
-    # Print run summary
-    print('Run {:4d}: # iterations: {:3d}, misclassified: {:3f}'.format(run, numIter, missed/numProb))
+                w = w + y[rndIndex] * x[rndIndex]                           # update the weights
+                numIter += 1
+            else:
+                # no misclassifications: done with this run
+                break
 
-    # Training plot
-    # plotPoints(xOrg, f_slope, f_intercept, y, w[0])
+        # Calculate P(f <> g) for a large number of out of sample points
+        tmpXOrg = np.random.uniform(minAxis, maxAxis, size=(numProb, d))          # create input vector
+        yActual = np.sign(tmpXOrg[:,0] * f_slope - tmpXOrg[:, 1] + f_intercept)   # determine y (= f evaluated on tmpXOrg)
+        tmpX = np.hstack((np.ones((numProb, 1)), tmpXOrg))                  # add x0 to tmpXOrg
+        yPred = np.sign(np.dot(tmpX, w.T).T)                                # evaluate the hypothesis g on x
+        missed = np.sum((yPred != yActual))                                 # number of misclassified points
+        probabilities.append(missed / numProb)                              # keep track of the P(f <> g) of each run
 
-    # Test plot
-    # plotPoints(tmpXOrg, f_slope, f_intercept, yActual, w[0])
+        # Print run summary
+        print('Run {:4d}: # iterations: {:3d}, misclassified: {:3f}'.format(run, numIter, missed/numProb))
 
-    # Keep track of the # of iterations
-    numIterations.append(numIter)
+        # Training plot (careful with large num_runs)
+        # plotPoints(xOrg, f_slope, f_intercept, y, w[0])
 
-# Print overall summary
-print('\n\nAverage # iterations after {} runs: {}'.format(num_runs, np.mean(numIterations)))
-print('                Average P(f <> g): {}'.format(np.mean(probabilities)))
+        # Test plot (careful with large num_runs)
+        # plotPoints(tmpXOrg, f_slope, f_intercept, yActual, w[0])
+
+        # Keep track of the # of iterations
+        numIterations.append(numIter)
+
+    # Print overall summary
+    print('\n\nAverage # iterations after {} runs: {}'.format(num_runs, np.mean(numIterations)))
+    print('                Average P(f <> g): {}'.format(np.mean(probabilities)))
 
 # ---------------- End ----------------
-
