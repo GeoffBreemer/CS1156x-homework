@@ -8,7 +8,7 @@ from Models import regression as reg
 minAxis = -1                # grid size
 maxAxis = 1
 d = 2                       # number of dimensions
-N = 10                      # number of training points
+N = 100                      # number of training points
 num_iter = 250              # maximum number of iterations per run
 num_runs = 1000             # number of runs
 numProb = 1000              # number of out of sample points used to predict P(f <> g)
@@ -57,7 +57,7 @@ for run in np.arange(num_runs):
     missed = np.sum((yPred != yActual))                                 # number of misclassified points
     probabilities.append(missed / numProb)                              # keep track of the P(f <> g) of each run
 
-    # Print run summary
+    # Print run summary (comment out to improve performance)
     print('Run {:4d}: # iterations: {:3d}, misclassified: {:3f}'.format(run, numIter, missed/numProb))
 
     # Training plot (careful with large num_runs)
