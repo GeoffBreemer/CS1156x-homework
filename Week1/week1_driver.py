@@ -2,37 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# ---------------- Functions ----------------
-def plotPoints(x, f_slope, f_intercept, y, g):
-    '''Plot the random points, target function f and hypothesis g'''
-    ax = plt.gca()
-    plt.xlim((minAxis, maxAxis))
-    plt.ylim((minAxis, maxAxis))
-
-    # Plot the data points, use y (labels) to set the color
-    plt.scatter(x[:, 0], x[:, 1], c=y)
-
-    # Plot target function f
-    x_min, x_max = ax.get_xlim()
-    y_min = f_slope * x_min + f_intercept
-    y_max = f_slope * x_max + f_intercept
-    plt.plot([x_min, x_max], [y_min, y_max], '--', label='target function f', c='g')
-
-    # Plot hypothesis g
-    plt.plot([x_min, x_max],
-             [(-g[0] - g[1] * x_min) / g[2],
-              (-g[0] - g[1] * x_max) / g[2]],
-             '--k', label='hypothesis g')
-
-    # Show the plot
-    ax.set_aspect('equal')
-    ax.grid(True, which='both')
-    ax.legend(loc='best')
-    plt.tight_layout()
-    plt.title('Target function, hypothesis and observations')
-    plt.show()
-
+from Models import regression as reg
 
 # ---------------- Start ----------------
 
@@ -94,10 +64,10 @@ if __name__ == "__main__":
         print('Run {:4d}: # iterations: {:3d}, misclassified: {:3f}'.format(run, numIter, missed/numProb))
 
         # Training plot (careful with large num_runs)
-        # plotPoints(xOrg, f_slope, f_intercept, y, w[0])
+        reg.plotPoints(xOrg, f_slope, f_intercept, y, w[0], minAxis, maxAxis)
 
         # Test plot (careful with large num_runs)
-        # plotPoints(tmpXOrg, f_slope, f_intercept, yActual, w[0])
+        reg.plotPoints(tmpXOrg, f_slope, f_intercept, yActual, w[0], minAxis, maxAxis)
 
         # Keep track of the # of iterations
         numIterations.append(numIter)

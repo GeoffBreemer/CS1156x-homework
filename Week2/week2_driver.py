@@ -1,8 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from Week1.week1_driver import plotPoints
-from Week1.Perceptron import Perceptron
-
+import numpy as np
+from Models import regression as reg
 
 # ---------------- Functions ----------------
 
@@ -57,6 +55,7 @@ def q5q6andq7():
 
     numMissedInSample = []
     numMissedOutOfSample = []
+    # For q7 only:
     numPLAIterations = []
 
     for _ in np.arange(num_runs):
@@ -68,10 +67,11 @@ def q5q6andq7():
         x = np.hstack((np.ones((N, 1)), xOrg))                     # add x0 to x
 
         # Calculate Linear Regression weights
-        w = np.dot(np.linalg.inv(np.dot(x.T, x)) , (np.dot(x.T, y)))
+        linreg = reg.LinearRegression()
+        w = linreg.fit(x, y)
 
         # For q7 only: run Perceptron with these weights as initial weights
-        # per = Perceptron(250, w.reshape((1, d+1)))
+        # per = reg.Perceptron(250, w.reshape((1, d+1)))
         # numPLAIterations.append(per.fit(x, y))
         # w = per.w
 
@@ -93,12 +93,13 @@ def q5q6andq7():
         # print('Run {:4d}, misclassified: {:3f}, PLA iter: {}'.format(run, missed / N, np.mean(numPLAIterations)))
 
         # Training plot
-        # plotPoints(xOrg, f_slope, f_intercept, y, w)
+        reg.plotPoints(xOrg, f_slope, f_intercept, y, w, minAxis, maxAxis)
 
     # Print summary
     print('    Mean # of in-sample misclassifications: {}'.format(np.mean(numMissedInSample)))
     print('Mean # of out-of-sample misclassifications: {}'.format(np.mean(numMissedOutOfSample)))
-    print('                  Number of PLA iterations: {}'.format(np.mean(numPLAIterations)))
+    # For q7 only:
+    # print('                  Number of PLA iterations: {}'.format(np.mean(numPLAIterations)))
 
 
 def q8():
@@ -142,9 +143,6 @@ def q8():
         numMissedOutOfSample.append(missed/numProb)
 
         # print('Run {:4d}, misclassified: {:3f}, PLA iter: {}'.format(run, missed / N, np.mean(numPLAIterations)))
-
-        # Training plot
-        # plotPoints(xOrg, f_slope, f_intercept, y, w)
 
     # Print summary
     print('    Mean # of in-sample misclassifications: {}'.format(np.mean(numMissedInSample)))
@@ -223,9 +221,9 @@ def q9q10():
 # ---------------- Start ----------------
 
 if __name__ == "__main__":
-    q1andq2()
+    # q1andq2()
     # q5q6andq7()
-    # q8()
+    q8()
     # q9q10()
 
 # ---------------- End ----------------
