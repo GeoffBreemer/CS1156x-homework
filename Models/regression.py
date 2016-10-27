@@ -48,6 +48,7 @@ class LinearRegression:
     def predict(self, X):
         return np.sign(np.dot(X, self.w.T).T)
 
+
 class Perceptron:
     '''Perceptron'''
     def __init__(self, num_iter, init_weights=None):
@@ -82,3 +83,52 @@ class Perceptron:
 
     def predict(self, X):
         return np.sign(np.dot(X, self.w.T).T)                                # evaluate the hypothesis g on x
+
+
+class LogisticRegression:
+    '''LogisticRegression'''
+    def __init__(self, learning_rate, threshold):
+        self.learning_rate = learning_rate                                  # maximum # of iterations
+        self.threshold = threshold                                          # stopping condition threshold
+
+    def fit(self, X, y):
+        # Run Stochastic Gradient Descent
+        epochCount = 1
+        self.w = np.zeros((1, X.shape[1]))
+
+        while True:
+            # Permute data for each epoch
+            np.random.permutation(X)
+
+            w_new = self.w
+            # Stochastic Gradient Descent:
+            for i in range(len(X)):
+                # Pick a random point
+                rndPoint = np.random.randint(0, len(X))
+                tmpX = X[rndPoint].reshape((X.shape[1], 1))
+                tmpy = y[rndPoint].reshape((y.shape[1], 1))
+
+                grad = -(  (tmpy.dot(tmpX.T) )  / ( 1.0 + np.exp(tmpy.dot(w_new).dot(tmpX))))
+
+                # Update weights
+                w_new = w_new - self.learning_rate * grad
+
+            # Batch Gradient Descent:
+            # grad = -1/len(X) * np.sum((  (y.T.dot(X) )  / ( 1.0 + np.exp(y.dot(self.w).T.dot(X)))))
+
+            # Stop if Euclidean distance between weights is less than the threshold
+            if (np.linalg.norm(self.w - w_new) < self.threshold):
+                break
+
+            # Else update weights and iterate
+            self.w = w_new
+            epochCount += 1
+
+        return epochCount
+
+    def predict(self, X):
+        return np.sign(np.dot(X, self.w.T))                                # evaluate the hypothesis g on x
+
+    def cross_entropy(self, X, y):
+        yPred = self.predict(X)
+        return (1 / len(X)) * np.sum(np.log(1 + np.exp(-y.dot(yPred.T))))
