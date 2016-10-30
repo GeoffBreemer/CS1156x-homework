@@ -2,45 +2,46 @@ import numpy as np
 from Models import regression as reg
 
 # q8+q9:
-N = 100
-N_test = 5000
-d = 2
-minAxis = -1
-maxAxis = 1
-lr = 0.01
-numIter = 100
-threshold  = 0.01
-cross_entropy = []
-epoch_counts = []
+N = 100                     # number of training points
+N_test = 5000               # number of test points
+d = 2                       # number of dimensions
+minAxis = -1                # min value for each dimension
+maxAxis = 1                 # max value for each dimension
+lr = 0.01                   # learning rate
+numIter = 100               # number of iterations
+threshold  = 0.01           # weight update stopping threshold
+
+test_cross_entropy = []     # test cross-entropy score for each iteration
+epoch_counts = []           # number of epochs for each iteration
+
+# Instantiate new Logistic Regression object
+logReg = reg.LogisticRegression(lr, threshold)
 
 for i in range(numIter):
     # Create target data set X, target function f, and values y
-    X = np.random.uniform(minAxis, maxAxis, size=(N, d))                        # create input vector x
     f_points = np.random.uniform(minAxis, maxAxis, size=(2, 2))                 # find two random points
     f_slope, f_intercept = np.polyfit(f_points[:, 0], f_points[:, 1], 1)        # and use them to create target function f
-    y = np.sign(X[:, 0] * f_slope - X[:, 1] + f_intercept)                      # determine y (= f evaluated on x)
+    X = np.random.uniform(minAxis, maxAxis, size=(N, d))                        # create input vector X
+    y = np.sign(X[:, 0] * f_slope - X[:, 1] + f_intercept)                      # determine y (= f evaluated on X)
+    X = np.hstack((np.ones((N, 1)), X))                                         # add bias to X
 
-    X = np.hstack((np.ones((N, 1)), X))                                         # add bias to x
+    # Fit the model using Stochastic Gradient Descent, store the number of epochs
+    epoch_counts.append(logReg.fit(X, y))
 
-    # Run Logistic Regression with Stochastic Gradient Descent
-    LogReg = reg.LogisticRegression(lr, threshold)
-    numEpochs = LogReg.fit(X, y)
-    epoch_counts.append(numEpochs)
+    # Evaluate E-out on a separate set of data points
+    XTest = np.random.uniform(minAxis, maxAxis, size=(N_test, d))               # create input vector XTest
+    yTest = np.sign(XTest[:, 0] * f_slope - XTest[:, 1] + f_intercept)          # determine yTest (= f evaluated on XTest)
+    XTest = np.hstack((np.ones((N_test, 1)), XTest))                            # add bias to XTest
 
-    # Evaluate error on a separate set of data points and calculate the cross-entropy error
-    tmpXOrg = np.random.uniform(minAxis, maxAxis, size=(N_test, d))             # create input vector
-    yActual = np.sign(tmpXOrg[:,0] * f_slope - tmpXOrg[:, 1] + f_intercept)     # determine y (= f evaluated on tmpXOrg)
+    # Calculate and store the error
+    test_cross_entropy.append(logReg.cross_entropy(XTest, yTest))
 
-    tmpX = np.hstack((np.ones((N_test, 1)), tmpXOrg))                           # add bias to tmpXOrg
-
-    error = LogReg.cross_entropy(tmpX, yActual)                                 # calculate and store the error
-    cross_entropy.append(error)
-
-    print('iter: {}, num epochs: {}, error: {}'.format(i, numEpochs, error))
+    # Print info about each iteration
+    print('Iter: {}, # epochs: {}, test cross-entropy error: {}'.format(i, epoch_counts[-1], test_cross_entropy[-1]))
 
 # Print overall summary
-print('\n                Average cross-entropy: {}'.format(np.mean(cross_entropy)))
-print('                  Average # of epochs: {}'.format(np.mean(epoch_counts)))
+print('\n                Average test cross-entropy: {}'.format(np.mean(test_cross_entropy)))
+print('                       Average # of epochs: {}'.format(np.mean(epoch_counts)))
 
 exit()
 

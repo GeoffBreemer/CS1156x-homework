@@ -110,12 +110,12 @@ class LogisticRegression:
             # Update weights for each data point
             for i in range(len(X)):
                 # Calculate the gradient
-                grad = -(  (y[i]*(X[i].T) )  / ( 1.0 + np.exp((y[i] * self.w).dot(X[i]))))
+                grad = -((y[i] * (X[i].T))/(1.0 + np.exp((y[i] * self.w).dot(X[i]))))
 
                 # Update weights
                 self.w = self.w - self.learning_rate * grad
 
-            # Stop if Euclidean distance between weights is less than the threshold
+            # Stop if the Euclidean distance between weight updates is less than the threshold
             if (np.linalg.norm(self.w - w_prev) < self.threshold):
                 break
 
@@ -124,11 +124,11 @@ class LogisticRegression:
         return epochCount
 
     def predict(self, X):
-        '''Return the class: +1 or -1'''
+        '''Return the predicted class: +1 or -1'''
         return np.sign(np.dot(X, self.w.T))
 
     def predict_score(self, X):
-        '''Return the class score'''
+        '''Return the class score (a real number, does NOT use np.sign)'''
         return np.dot(X, self.w.T)
 
     def cross_entropy(self, X, yActual):
