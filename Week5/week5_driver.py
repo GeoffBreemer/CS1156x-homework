@@ -1,9 +1,9 @@
 import numpy as np
 from Models import regression as reg
 
-# q8:
+# q8+q9:
 N = 100
-N_test = 500
+N_test = 5000
 d = 2
 minAxis = -1
 maxAxis = 1
@@ -13,39 +13,34 @@ threshold  = 0.01
 cross_entropy = []
 epoch_counts = []
 
-# https://github.com/lytemar/Caltech-CS1156x-Learning-from-Data/blob/master/HW5_probs8_9.m
 for i in range(numIter):
-    # Create target data set D, target function f, and values y
-    D = np.random.uniform(minAxis, maxAxis, size=(N, d))  # create input vector x
-    f_points = np.random.uniform(minAxis, maxAxis, size=(2, 2))  # find two random points
-    f_slope, f_intercept = np.polyfit(f_points[:, 0], f_points[:, 1], 1)  # and use them to create target function f
-    y = np.sign(D[:, 0] * f_slope - D[:, 1] + f_intercept)  # determine y (= f evaluated on x)
+    # Create target data set X, target function f, and values y
+    X = np.random.uniform(minAxis, maxAxis, size=(N, d))                        # create input vector x
+    f_points = np.random.uniform(minAxis, maxAxis, size=(2, 2))                 # find two random points
+    f_slope, f_intercept = np.polyfit(f_points[:, 0], f_points[:, 1], 1)        # and use them to create target function f
+    y = np.sign(X[:, 0] * f_slope - X[:, 1] + f_intercept)                      # determine y (= f evaluated on x)
 
-    D = np.hstack((np.ones((N, 1)), D))  # add x0 to x
-    y = y.reshape((len(D), 1))
+    X = np.hstack((np.ones((N, 1)), X))                                         # add bias to x
 
     # Run Logistic Regression with Stochastic Gradient Descent
     LogReg = reg.LogisticRegression(lr, threshold)
-    numEpochs = LogReg.fit(D, y)
+    numEpochs = LogReg.fit(X, y)
     epoch_counts.append(numEpochs)
 
     # Evaluate error on a separate set of data points and calculate the cross-entropy error
-    tmpXOrg = np.random.uniform(minAxis, maxAxis, size=(N_test, d))           # create input vector
-    yActual = np.sign(tmpXOrg[:,0] * f_slope - tmpXOrg[:, 1] + f_intercept)   # determine y (= f evaluated on tmpXOrg)
+    tmpXOrg = np.random.uniform(minAxis, maxAxis, size=(N_test, d))             # create input vector
+    yActual = np.sign(tmpXOrg[:,0] * f_slope - tmpXOrg[:, 1] + f_intercept)     # determine y (= f evaluated on tmpXOrg)
 
-    tmpX = np.hstack((np.ones((N_test, 1)), tmpXOrg))                         # add x0 to tmpXOrg
-    yActual = yActual.reshape((len(yActual), 1))
+    tmpX = np.hstack((np.ones((N_test, 1)), tmpXOrg))                           # add bias to tmpXOrg
 
-    # error = LogReg.cross_entropy(tmpX, yActual)
-    error = (1/len(tmpX)) * np.sum(  np.log(1+np.exp(-yActual.dot(LogReg.predict(tmpX))))   )
+    error = LogReg.cross_entropy(tmpX, yActual)                                 # calculate and store the error
     cross_entropy.append(error)
 
-    print('iter: {}, num epochs: {}, error: {}\n'.format(i, numEpochs, error))
+    print('iter: {}, num epochs: {}, error: {}'.format(i, numEpochs, error))
 
 # Print overall summary
-print('                Average cross-entropy: {}'.format(np.mean(cross_entropy)))
+print('\n                Average cross-entropy: {}'.format(np.mean(cross_entropy)))
 print('                  Average # of epochs: {}'.format(np.mean(epoch_counts)))
-
 
 exit()
 

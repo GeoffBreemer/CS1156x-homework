@@ -86,49 +86,51 @@ class Perceptron:
 
 
 class LogisticRegression:
-    '''LogisticRegression'''
+    '''LogisticRegression with SGD'''
     def __init__(self, learning_rate, threshold):
         self.learning_rate = learning_rate                                  # maximum # of iterations
         self.threshold = threshold                                          # stopping condition threshold
+
+    def shuffle(self, X, y):
+        '''Permute X and y in the same way'''
+        p = np.random.permutation(len(X))
+        return X[p], y[p]
 
     def fit(self, X, y):
         # Run Stochastic Gradient Descent
         epochCount = 1
         self.w = np.zeros((1, X.shape[1]))
 
+        # Stochastic Gradient Descent:
         while True:
             # Permute data for each epoch
-            np.random.permutation(X)
+            X, y = self.shuffle(X, y)
+            w_prev = self.w
 
-            w_new = self.w
-            # Stochastic Gradient Descent:
+            # Update weights for each data point
             for i in range(len(X)):
-                # Pick a random point
-                rndPoint = np.random.randint(0, len(X))
-                tmpX = X[rndPoint].reshape((X.shape[1], 1))
-                tmpy = y[rndPoint].reshape((y.shape[1], 1))
-
-                grad = -(  (tmpy.dot(tmpX.T) )  / ( 1.0 + np.exp(tmpy.dot(w_new).dot(tmpX))))
+                # Calculate the gradient
+                grad = -(  (y[i]*(X[i].T) )  / ( 1.0 + np.exp((y[i] * self.w).dot(X[i]))))
 
                 # Update weights
-                w_new = w_new - self.learning_rate * grad
-
-            # Batch Gradient Descent:
-            # grad = -1/len(X) * np.sum((  (y.T.dot(X) )  / ( 1.0 + np.exp(y.dot(self.w).T.dot(X)))))
+                self.w = self.w - self.learning_rate * grad
 
             # Stop if Euclidean distance between weights is less than the threshold
-            if (np.linalg.norm(self.w - w_new) < self.threshold):
+            if (np.linalg.norm(self.w - w_prev) < self.threshold):
                 break
 
-            # Else update weights and iterate
-            self.w = w_new
             epochCount += 1
 
         return epochCount
 
     def predict(self, X):
-        return np.sign(np.dot(X, self.w.T))                                # evaluate the hypothesis g on x
+        '''Return the class: +1 or -1'''
+        return np.sign(np.dot(X, self.w.T))
 
-    def cross_entropy(self, X, y):
-        yPred = self.predict(X)
-        return (1 / len(X)) * np.sum(np.log(1 + np.exp(-y.dot(yPred.T))))
+    def predict_score(self, X):
+        '''Return the class score'''
+        return np.dot(X, self.w.T)
+
+    def cross_entropy(self, X, yActual):
+        '''Calculate the cross-entropy score'''
+        return (1 / len(X)) * np.sum(np.log(1 + np.exp(-yActual*(self.predict_score(X).T))))
