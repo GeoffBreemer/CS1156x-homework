@@ -19,7 +19,7 @@ logReg = reg.LogisticRegression(lr, threshold)
 
 for i in range(numIter):
     # Create target data set X, target function f, and values y
-    f_points = np.random.uniform(minAxis, maxAxis, size=(2, 2))                 # find two random points
+    f_points = np.random.uniform(minAxis, maxAxis, size=(d, d))                 # find two random points
     f_slope, f_intercept = np.polyfit(f_points[:, 0], f_points[:, 1], 1)        # and use them to create target function f
     X = np.random.uniform(minAxis, maxAxis, size=(N, d))                        # create input vector X
     y = np.sign(X[:, 0] * f_slope - X[:, 1] + f_intercept)                      # determine y (= f evaluated on X)

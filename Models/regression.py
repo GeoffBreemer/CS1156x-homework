@@ -41,8 +41,9 @@ class LinearRegression:
     def __init__(self):
         pass
 
-    def fit(self, X, y):
-        self.w = np.dot(np.linalg.inv(np.dot(X.T, X)) , (np.dot(X.T, y)))
+    def fit(self, X, y, reg=0):
+        dotProd = np.dot(X.T, X)
+        self.w = np.dot( np.linalg.inv( dotProd + reg * np.ones(dotProd.shape)) , np.dot(X.T, y))
         return self.w
 
     def predict(self, X):
