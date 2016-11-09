@@ -42,11 +42,16 @@ class LinearRegression:
         pass
 
     def fit(self, X, y, reg=0):
-        self.w = np.dot(np.linalg.inv(np.dot(X.T, X) + reg * np.identity(X.shape[1], dtype=int)),np.dot(X.T, y))
+        self.reg = reg
+        self.w = np.dot(np.linalg.inv(np.dot(X.T, X) + self.reg * np.identity(X.shape[1], dtype=int)),np.dot(X.T, y))
+
         return self.w
 
     def predict(self, X):
-        return np.sign(np.dot(X, self.w.T).T)
+        return np.sign(np.dot(X, self.w))
+
+    def score(self, X, y):
+        return np.sum((self.predict(X) != y)) / len(X) + self.reg/len(X)*np.dot(self.w.T, self.w)
 
 
 class Perceptron:

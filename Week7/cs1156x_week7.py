@@ -24,18 +24,32 @@ def read_and_transform(filename):
 
 # Read X and y and apply non-linear transformation for both data sets
 X, y = read_and_transform("in.dta")
+
+# Q1 and Q2:
+XTrain = X[:25]
+yTrain = y[:25]
+XVal = X[25:]
+yVal = y[25:]
+
+# Q3 and Q4:
+# XVal= X[:25]
+# yVal= y[:25]
+# XTrain = X[25:]
+# yTrain = y[25:]
+
+del X, y    # to avoid confusion
 XTest, yTest = read_and_transform("out.dta")
 
 linReg = reg.LinearRegression()
 
-# Loop through various values of lambda/k
-krange = np.linspace(-3, 3, 7, dtype=int)
+# Loop through various models (k determines which features to use)
+krange = [3, 4, 5, 6, 7]
 for k in krange:
-    l = 10 ** k
-    # l = 0 # uncomment this line for Q2, comment out this line for all other questions
-
     # Fit linear regression model
-    w = linReg.fit(X, y, reg=l)
+    w = linReg.fit(XTrain[:, 0:k+1], yTrain)
 
-    # Print E-aug for each k
-    print("k = {:3d} -> E-in: {:8.4f}, E-out: {:8.4f}".format(k, linReg.score(X, y), linReg.score(XTest, yTest)))
+    # Print error for each set for each k
+    print("k = {:3d} -> Training: {:8.8f}, Validation: {:8.8f}, Test: {:8.8f}".format(k,
+                                                                            linReg.score(XTrain[:, 0:k+1], yTrain),
+                                                                            linReg.score(XVal[:, 0:k + 1], yVal),
+                                                                            linReg.score(XTest[:, 0:k+1], yTest)))
